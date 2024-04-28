@@ -73,16 +73,16 @@ export default function Features() {
 
             for (let i = 0; i < entries.length; i++) {
               const entry = entries[i];
-              if (entry?.priority === false) {
-                console.log(entry)
+              if (entry.priority === false) {
                 const val = {
                   icon: <ViewQuiltRoundedIcon />,
                   title: entry.title,
-                  description: entry.info,
+                  description: entry.info + "...",
                   imageLight:
                     'url("/static/images/templates/templates-images/dash-light.png")',
                   imageDark:
                     'url("/static/images/templates/templates-images/dash-dark.png")',
+                  imageURL: entry.imageURL,
                 };
                 temp.push(val);
               }
@@ -97,18 +97,20 @@ export default function Features() {
               for (let i = 0; i < remaining; i++) {
                 const defaultVal = {
                   icon: <ViewQuiltRoundedIcon />,
-                  title: "Default Title",
-                  description: "Default Description",
+                  title: "No Info....",
+                  description: "...",
                   imageLight:
                     'url("/static/images/templates/templates-images/default-light.png")',
                   imageDark:
                     'url("/static/images/templates/templates-images/default-dark.png")',
+                    imageURL: "",
                 };
                 temp.push(defaultVal);
               }
             }
 
             setSideImage(temp);
+            console.log(sideImage)
             setImageUrl(imageURL);
           }
         });
@@ -124,11 +126,12 @@ export default function Features() {
 
     fetchImageUrl();
   }, []);
+
   const handleItemClick = (index) => {
     setSelectedItemIndex(index);
   };
 
-  const selectedFeature = items[selectedItemIndex];
+  const selectedFeature = sideImage[selectedItemIndex];
 
   return (
     <Container id="features" sx={{ py: { xs: 8, sm: 16 } }}>
@@ -154,7 +157,7 @@ export default function Features() {
             gap={1}
             sx={{ display: { xs: "auto", sm: "none" } }}
           >
-            {items.map(({ title }, index) => (
+            {sideImage.map(({ title }, index) => (
               <Chip
                 key={index}
                 label={title}
@@ -193,8 +196,8 @@ export default function Features() {
               sx={{
                 backgroundImage: (theme) =>
                   theme.palette.mode === "light"
-                    ? items[selectedItemIndex].imageLight
-                    : items[selectedItemIndex].imageDark,
+                    ? sideImage[selectedItemIndex]?.imageLight
+                    : sideImage[selectedItemIndex]?.imageDark,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 minHeight: 280,
@@ -206,32 +209,32 @@ export default function Features() {
                 variant="body2"
                 fontWeight="bold"
               >
-                {selectedFeature.title}
+                {selectedFeature?.title || ""}
               </Typography>
               <Typography
                 color="text.secondary"
                 variant="body2"
                 sx={{ my: 0.5 }}
               >
-                {selectedFeature.description}
+                {selectedFeature?.description || ""}
               </Typography>
               <Link
-                color="primary"
-                variant="body2"
-                fontWeight="bold"
-                sx={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  "& > svg": { transition: "0.2s" },
-                  "&:hover > svg": { transform: "translateX(2px)" },
-                }}
-              >
-                <span>Learn more</span>
-                <ChevronRightRoundedIcon
-                  fontSize="small"
-                  sx={{ mt: "1px", ml: "2px" }}
-                />
-              </Link>
+  color="primary"
+  variant="body2"
+  fontWeight="bold"
+  href={selectedFeature?.imageURL || ""}
+  target="_blank"
+  rel="noopener noreferrer"
+  sx={{
+    display: "inline-flex",
+    alignItems: "center",
+    "& > svg": { transition: "0.2s" },
+    "&:hover > svg": { transform: "translateX(2px)" },
+  }}
+>
+  <span>Learn more</span>
+  <ChevronRightRoundedIcon fontSize="small" sx={{ mt: "1px", ml: "2px" }} />
+</Link>
             </Box>
           </Box>
           <Stack
@@ -242,7 +245,7 @@ export default function Features() {
             useFlexGap
             sx={{ width: "100%", display: { xs: "none", sm: "flex" } }}
           >
-            {items.map(({ icon, title, description }, index) => (
+            {sideImage.map(({ icon, title, description }, index) => (
               <Card
                 key={index}
                 variant="outlined"
