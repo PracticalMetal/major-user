@@ -70,7 +70,7 @@ export default function LandingPage() {
   };
 
   return (
-  <Container>
+
     <ThemeProvider theme={defaultTheme}>
       
       <CssBaseline />
@@ -83,6 +83,5 @@ export default function LandingPage() {
         </Box>
         
     </ThemeProvider>
-    </Container>
   );
 }

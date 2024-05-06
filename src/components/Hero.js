@@ -14,7 +14,7 @@ export default function Hero() {
       sx={(theme) => ({
         width: '100%',
         backgroundImage:'linear-gradient(180deg, #CEE5FD, #FFF)',
-        backgroundSize: '100% 20%',
+        backgroundSize: '100% 60%',
         backgroundRepeat: 'no-repeat',
       })}
     >
