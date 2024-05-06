@@ -192,6 +192,8 @@ export default function Features() {
             sx={{
               display: { xs: "auto", sm: "none" },
               mt: 4,
+              height: 280, // Fixed height for the card
+              overflow: "hidden", // Hide overflow to prevent image stretching
             }}
           >
             <Box
@@ -202,7 +204,7 @@ export default function Features() {
                     : sideImage[selectedItemIndex]?.imageDark,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-                minHeight: 280,
+                minHeight: "100%", // Ensure the image covers the entire height of the card
               }}
             />
             <Box sx={{ px: 2, pb: 2 }}>
@@ -352,12 +354,13 @@ export default function Features() {
               width: "100%",
               display: { xs: "none", sm: "flex" },
               pointerEvents: "none",
+              overflow: "hidden", // Hide overflow to prevent image stretching
             }}
           >
             <img
               src={imageUrl}
               alt="MSIT"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              style={{ width: "100%", height: "110%", objectFit: "cover" }}
             />
           </Card>
         </Grid>
