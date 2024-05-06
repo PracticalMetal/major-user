@@ -15,6 +15,7 @@ import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import DevicesRoundedIcon from "@mui/icons-material/DevicesRounded";
 import EdgesensorHighRoundedIcon from "@mui/icons-material/EdgesensorHighRounded";
 import ViewQuiltRoundedIcon from "@mui/icons-material/ViewQuiltRounded";
+import Carousel from './Carousel'
 
 const items = [
   {
@@ -73,10 +74,11 @@ export default function Features() {
 
             for (let i = 0; i < entries.length; i++) {
               const entry = entries[i];
+              console.log(entry);
               if (entry.priority === false) {
                 const val = {
                   icon: <ViewQuiltRoundedIcon />,
-                  title: entry.title,
+                  title: entry.title + " - " + entry.eventDate,
                   description: entry.info + "...",
                   imageLight:
                     'url("/static/images/templates/templates-images/dash-light.png")',
@@ -134,7 +136,7 @@ export default function Features() {
   const selectedFeature = sideImage[selectedItemIndex];
 
   return (
-    <Container id="features" sx={{ py: { xs: 8, sm: 16 } }}>
+    <Container id="features" sx={{ py: { xs: 8, sm: 6 } }}>
       <Grid container spacing={6}>
         <Grid item xs={12} md={6}>
           <div>

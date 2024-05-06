@@ -1,6 +1,6 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-
+import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
@@ -10,6 +10,8 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import AppAppBar from './components/AppAppBar';
 import Features from './components/Features';
+import Carousel from './components/Carousel';
+import Hero from './components/Hero';
 import getLPTheme from './getLPTheme';
 
 function ToggleCustomTheme({ showCustomTheme, toggleCustomTheme }) {
@@ -68,13 +70,19 @@ export default function LandingPage() {
   };
 
   return (
+  <Container>
     <ThemeProvider theme={defaultTheme}>
+      
       <CssBaseline />
       <AppAppBar mode={mode} toggleColorMode={toggleColorMode} />
+      <Hero/>
         <Box sx={{ bgcolor: 'background.default' }}>
+          {/* <Carousel /> */}
           <Features />
           <Divider />
         </Box>
+        
     </ThemeProvider>
+    </Container>
   );
 }
