@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { database } from "../firebase-config.js";
 import { ref as databaseRef, onValue, off } from "firebase/database";
 
@@ -10,49 +10,27 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
+import StarIcon from "@mui/icons-material/Star";
 import Typography from "@mui/material/Typography";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import DevicesRoundedIcon from "@mui/icons-material/DevicesRounded";
 import EdgesensorHighRoundedIcon from "@mui/icons-material/EdgesensorHighRounded";
 import ViewQuiltRoundedIcon from "@mui/icons-material/ViewQuiltRounded";
-import Carousel from './Carousel'
 
-const items = [
-  {
-    icon: <ViewQuiltRoundedIcon />,
-    title: "Dashboard",
-    description:
-      "This item could provide a snapshot of the most important metrics or data points related to the product.",
-    imageLight:
-      'url("/static/images/templates/templates-images/dash-light.png")',
-    imageDark: 'url("/static/images/templates/templates-images/dash-dark.png")',
-  },
-  {
-    icon: <EdgesensorHighRoundedIcon />,
-    title: "Mobile integration",
-    description:
-      "This item could provide information about the mobile app version of the product.",
-    imageLight:
-      'url("/static/images/templates/templates-images/mobile-light.png")',
-    imageDark:
-      'url("/static/images/templates/templates-images/mobile-dark.png")',
-  },
-  {
-    icon: <DevicesRoundedIcon />,
-    title: "Available on all platforms",
-    description:
-      "This item could let users know the product is available on all platforms, such as web, mobile, and desktop.",
-    imageLight:
-      'url("/static/images/templates/templates-images/devices-light.png")',
-    imageDark:
-      'url("/static/images/templates/templates-images/devices-dark.png")',
-  },
-];
+const Features = () => {
+  const [selectedItemIndex, setSelectedItemIndex] = useState(0);
+  const [imageUrl, setImageUrl] = useState(null);
+  const [sideImage, setSideImage] = useState([]);
+  const [visibleCards, setVisibleCards] = useState([]);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-export default function Features() {
-  const [selectedItemIndex, setSelectedItemIndex] = React.useState(0);
-  const [imageUrl, setImageUrl] = React.useState(null);
-  const [sideImage, setSideImage] = React.useState([]);
+  const parseDate = (dateString) => {
+    const parts = dateString.split("/");
+    const day = parseInt(parts[0]);
+    const month = parseInt(parts[1]) - 1; // Months are zero-based
+    const year = parseInt(parts[2]);
+    return new Date(year, month, day);
+  };
 
   useEffect(() => {
     const fetchImageUrl = async () => {
@@ -64,7 +42,6 @@ export default function Features() {
         const listener = onValue(imagesRef, (snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.val();
-            // Find the imageURL where priority is true
             const imageURL = Object.values(data).find(
               (image) => image.priority === true
             )?.imageURL;
@@ -74,28 +51,24 @@ export default function Features() {
 
             for (let i = 0; i < entries.length; i++) {
               const entry = entries[i];
-              console.log(entry);
               if (entry.priority === false) {
                 const val = {
                   icon: <ViewQuiltRoundedIcon />,
-                  title: entry.title + " - " + entry.eventDate,
+                  title: entry.title,
                   description: entry.info + "...",
                   imageLight:
                     'url("/static/images/templates/templates-images/dash-light.png")',
                   imageDark:
                     'url("/static/images/templates/templates-images/dash-dark.png")',
                   imageURL: entry.imageURL,
+                  eventDate: entry.eventDate,
                 };
                 temp.push(val);
               }
-
-              if (temp.length >= 3) {
-                break; // Exit the loop if temp length is greater than or equal to 3
-              }
             }
 
-            if (temp.length < 3) {
-              const remaining = 3 - temp.length;
+            if (temp.length < 9) {
+              const remaining = 9 - temp.length;
               for (let i = 0; i < remaining; i++) {
                 const defaultVal = {
                   icon: <ViewQuiltRoundedIcon />,
@@ -105,19 +78,36 @@ export default function Features() {
                     'url("/static/images/templates/templates-images/default-light.png")',
                   imageDark:
                     'url("/static/images/templates/templates-images/default-dark.png")',
-                    imageURL: "",
+                  imageURL: "",
                 };
                 temp.push(defaultVal);
               }
             }
 
+            temp.sort((a, b) => {
+              const today = new Date();
+              const dateA = parseDate(a.eventDate);
+              const dateB = parseDate(b.eventDate);
+
+              if (dateA < today) {
+                return 1;
+              }
+
+              if (dateB < today) {
+                return -1;
+              }
+
+              const differenceA = Math.abs(dateA - today);
+              const differenceB = Math.abs(dateB - today);
+              return differenceA - differenceB;
+            });
+
             setSideImage(temp);
-            console.log(sideImage)
             setImageUrl(imageURL);
+            setVisibleCards(temp.slice(0, 4));
           }
         });
 
-        // Cleanup function to remove the listener when component unmounts
         return () => {
           off(listener);
         };
@@ -129,6 +119,20 @@ export default function Features() {
     fetchImageUrl();
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        const newIndex = (selectedItemIndex + 4) % sideImage.length;
+        setSelectedItemIndex(newIndex);
+        setVisibleCards(sideImage.slice(newIndex, newIndex + 4));
+        setIsTransitioning(false);
+      }, 500); // Adjust this delay to match your transition duration
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [selectedItemIndex, sideImage]);
+
   const handleItemClick = (index) => {
     setSelectedItemIndex(index);
   };
@@ -136,21 +140,41 @@ export default function Features() {
   const selectedFeature = sideImage[selectedItemIndex];
 
   return (
-    <Container id="features" sx={{ py: { xs: 8, sm: 6 } }}>
+    <Container id="features" sx={{ py: { xs: 8, sm: 2 } }}>
       <Grid container spacing={6}>
         <Grid item xs={12} md={6}>
           <div>
-            <Typography component="h2" variant="h4" color="text.primary">
-              Important Announcements
-            </Typography>
             <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{ mb: { xs: 2, sm: 4 } }}
+              component="h2"
+              variant="h4"
+              color="text.primary"
+              sx={{ mb: { xs: 2, sm: 2 } }}
             >
-              Here you can provide with all the important information and dates
-              with regards to various activities and events happening in our
-              organization.
+              Important Announcements
+              <StarIcon
+                sx={{
+                  color: "red",
+                  animation: "flash 0.5s infinite alternate",
+                  padding: "2px",
+                  "@keyframes flash": {
+                    "0%": {
+                      opacity: 1,
+                    },
+                    "100%": {
+                      opacity: 0,
+                    },
+                  },
+                }}
+              />
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ mb: { xs: 2, sm: 4 } }}
+              >
+                Discover all the vital announcements and upcoming events here,
+                all of which are quickly approaching and require your immediate
+                attention.
+              </Typography>
             </Typography>
           </div>
           <Grid
@@ -159,29 +183,37 @@ export default function Features() {
             gap={1}
             sx={{ display: { xs: "auto", sm: "none" } }}
           >
-            {sideImage.map(({ title }, index) => (
+            {visibleCards.map(({ title }, index) => (
               <Chip
                 key={index}
                 label={title}
-                onClick={() => handleItemClick(index)}
+                onClick={() => handleItemClick(selectedItemIndex + index)}
                 sx={{
+                  color: "red",
                   borderColor: (theme) => {
                     if (theme.palette.mode === "light") {
-                      return selectedItemIndex === index ? "primary.light" : "";
+                      return selectedItemIndex + index === selectedItemIndex
+                        ? "primary.light"
+                        : "";
                     }
-                    return selectedItemIndex === index ? "primary.light" : "";
+                    return selectedItemIndex + index === selectedItemIndex
+                      ? "primary.light"
+                      : "";
                   },
                   background: (theme) => {
                     if (theme.palette.mode === "light") {
-                      return selectedItemIndex === index ? "none" : "";
+                      return selectedItemIndex + index === selectedItemIndex
+                        ? "none"
+                        : "";
                     }
-                    return selectedItemIndex === index ? "none" : "";
+                    return selectedItemIndex + index === selectedItemIndex
+                      ? "none"
+                      : "";
                   },
                   backgroundColor:
-                    selectedItemIndex === index ? "primary.main" : "",
-                  "& .MuiChip-label": {
-                    color: selectedItemIndex === index ? "#fff" : "",
-                  },
+                    selectedItemIndex + index === selectedItemIndex
+                      ? "primary.main"
+                      : "",
                 }}
               />
             ))}
@@ -194,14 +226,16 @@ export default function Features() {
               mt: 4,
               height: 280, // Fixed height for the card
               overflow: "hidden", // Hide overflow to prevent image stretching
+              transition: "opacity 0.5s",
+              opacity: isTransitioning ? 0 : 1,
             }}
           >
             <Box
               sx={{
                 backgroundImage: (theme) =>
                   theme.palette.mode === "light"
-                    ? sideImage[selectedItemIndex]?.imageLight
-                    : sideImage[selectedItemIndex]?.imageDark,
+                    ? visibleCards[selectedItemIndex]?.imageLight
+                    : visibleCards[selectedItemIndex]?.imageDark,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 minHeight: "100%", // Ensure the image covers the entire height of the card
@@ -223,22 +257,25 @@ export default function Features() {
                 {selectedFeature?.description || ""}
               </Typography>
               <Link
-  color="primary"
-  variant="body2"
-  fontWeight="bold"
-  href={selectedFeature?.imageURL || ""}
-  target="_blank"
-  rel="noopener noreferrer"
-  sx={{
-    display: "inline-flex",
-    alignItems: "center",
-    "& > svg": { transition: "0.2s" },
-    "&:hover > svg": { transform: "translateX(2px)" },
-  }}
->
-  <span>Learn more</span>
-  <ChevronRightRoundedIcon fontSize="small" sx={{ mt: "1px", ml: "2px" }} />
-</Link>
+                color="primary"
+                variant="body2"
+                fontWeight="bold"
+                href={selectedFeature?.imageURL || ""}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  "& > svg": { transition: "0.2s" },
+                  "&:hover > svg": { transform: "translateX(2px)" },
+                }}
+              >
+                <span>Learn more</span>
+                <ChevronRightRoundedIcon
+                  fontSize="small"
+                  sx={{ mt: "1px", ml: "2px" }}
+                />
+              </Link>
             </Box>
           </Box>
           <Stack
@@ -249,96 +286,119 @@ export default function Features() {
             useFlexGap
             sx={{ width: "100%", display: { xs: "none", sm: "flex" } }}
           >
-            {sideImage.map(({ icon, title, description }, index) => (
-              <Card
-                key={index}
-                variant="outlined"
-                component={Button}
-                onClick={() => handleItemClick(index)}
-                sx={{
-                  p: 3,
-                  height: "fit-content",
-                  width: "100%",
-                  background: "none",
-                  backgroundColor:
-                    selectedItemIndex === index ? "action.selected" : undefined,
-                  borderColor: (theme) => {
-                    if (theme.palette.mode === "light") {
-                      return selectedItemIndex === index
-                        ? "primary.light"
-                        : "grey.200";
-                    }
-                    return selectedItemIndex === index
-                      ? "primary.dark"
-                      : "grey.800";
-                  },
-                }}
-              >
-                <Box
+            {visibleCards.map(
+              ({ icon, title, description, eventDate }, index) => (
+                <Card
+                  key={index}
+                  variant="outlined"
+                  component={Button}
+                  onClick={() => handleItemClick(selectedItemIndex + index)}
                   sx={{
+                    p: 3,
+                    height: "fit-content",
                     width: "100%",
-                    display: "flex",
-                    textAlign: "left",
-                    flexDirection: { xs: "column", md: "row" },
-                    alignItems: { md: "center" },
-                    gap: 2.5,
+                    background: "none",
+                    backgroundColor:
+                      selectedItemIndex + index === selectedItemIndex
+                        ? "action.selected"
+                        : undefined,
+                    borderColor: (theme) => {
+                      if (theme.palette.mode === "light") {
+                        return selectedItemIndex + index === selectedItemIndex
+                          ? "primary.light"
+                          : "grey.200";
+                      }
+                      return selectedItemIndex + index === selectedItemIndex
+                        ? "primary.dark"
+                        : "grey.800";
+                    },
+                    transition: "opacity 0.5s",
+                    opacity: isTransitioning ? 0 : 1,
                   }}
                 >
                   <Box
                     sx={{
-                      color: (theme) => {
-                        if (theme.palette.mode === "light") {
-                          return selectedItemIndex === index
-                            ? "primary.main"
-                            : "grey.300";
-                        }
-                        return selectedItemIndex === index
-                          ? "primary.main"
-                          : "grey.700";
-                      },
+                      width: "100%",
+                      display: "flex",
+                      textAlign: "left",
+                      flexDirection: { xs: "column", md: "row" },
+                      alignItems: { md: "center" },
+                      gap: 2.5,
                     }}
                   >
-                    {icon}
-                  </Box>
-                  <Box sx={{ textTransform: "none" }}>
-                    <Typography
-                      color="text.primary"
-                      variant="body2"
-                      fontWeight="bold"
-                    >
-                      {title}
-                    </Typography>
-                    <Typography
-                      color="text.secondary"
-                      variant="body2"
-                      sx={{ my: 0.5 }}
-                    >
-                      {description}
-                    </Typography>
-                    <Link
-                      color="primary"
-                      variant="body2"
-                      fontWeight="bold"
+                    <Box
                       sx={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        "& > svg": { transition: "0.2s" },
-                        "&:hover > svg": { transform: "translateX(2px)" },
-                      }}
-                      onClick={(event) => {
-                        event.stopPropagation();
+                        color: (theme) => {
+                          if (theme.palette.mode === "light") {
+                            return selectedItemIndex + index ===
+                              selectedItemIndex
+                              ? "primary.main"
+                              : "grey.300";
+                          }
+                          return selectedItemIndex + index === selectedItemIndex
+                            ? "primary.main"
+                            : "grey.700";
+                        },
                       }}
                     >
-                      <span>Learn more</span>
-                      <ChevronRightRoundedIcon
-                        fontSize="small"
-                        sx={{ mt: "1px", ml: "2px" }}
-                      />
-                    </Link>
+                      {icon}
+                    </Box>
+                    <Box sx={{ textTransform: "none" }}>
+                      <Stack
+                        direction="row"
+                        spacing={2}
+                        sx={{ justifyContent: "space-between" }}
+                      >
+                        <Typography
+                          color="text.primary"
+                          variant="body2"
+                          fontWeight="bold"
+                        >
+                          {title}
+                        </Typography>
+                        <Typography
+                          color="text.secondary"
+                          variant="body2"
+                          fontWeight="bold"
+                        >
+                          {eventDate}
+                        </Typography>
+                      </Stack>
+                      <Typography
+                        color="text.secondary"
+                        variant="body2"
+                        sx={{ my: 0.5 }}
+                      >
+                        {description}
+                      </Typography>
+                      <Link
+                        color="primary"
+                        variant="body2"
+                        fontWeight="bold"
+                        href={selectedFeature?.imageURL || ""}
+                        target="_blank" // Opens the link in a new tab
+                        rel="noopener noreferrer" // Security measure
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          "& > svg": { transition: "0.2s" },
+                          "&:hover > svg": { transform: "translateX(2px)" },
+                        }}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                        }}
+                      >
+                        <span>Learn more</span>
+                        <ChevronRightRoundedIcon
+                          fontSize="small"
+                          sx={{ mt: "1px", ml: "2px" }}
+                        />
+                      </Link>
+                    </Box>
                   </Box>
-                </Box>
-              </Card>
-            ))}
+                </Card>
+              )
+            )}
           </Stack>
         </Grid>
         <Grid
@@ -353,6 +413,7 @@ export default function Features() {
               height: "100%",
               width: "100%",
               display: { xs: "none", sm: "flex" },
+              pb: 0,
               pointerEvents: "none",
               overflow: "hidden", // Hide overflow to prevent image stretching
             }}
@@ -360,11 +421,13 @@ export default function Features() {
             <img
               src={imageUrl}
               alt="MSIT"
-              style={{ width: "100%", height: "110%", objectFit: "cover" }}
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </Card>
         </Grid>
       </Grid>
     </Container>
   );
-}
+};
+
+export default Features;

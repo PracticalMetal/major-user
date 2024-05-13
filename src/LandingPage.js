@@ -10,7 +10,8 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import AppAppBar from './components/AppAppBar';
 import Features from './components/Features';
-import Carousel from './components/Carousel';
+import Testimonials from './components/Testimonials';
+import Footer from './components/Footer'
 import Hero from './components/Hero';
 import getLPTheme from './getLPTheme';
 
@@ -79,7 +80,8 @@ export default function LandingPage() {
         <Box sx={{ bgcolor: 'background.default' }}>
           {/* <Carousel /> */}
           <Features />
-          <Divider />
+          <Testimonials/>
+          <Footer />
         </Box>
         
     </ThemeProvider>

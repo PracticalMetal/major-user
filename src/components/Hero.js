@@ -1,9 +1,6 @@
 import * as React from 'react';
-import { alpha } from '@mui/material';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
@@ -29,21 +26,18 @@ export default function Hero() {
       >
         <Stack spacing={2} useFlexGap sx={{ width: { xs: '100%', sm: '70%' } }}>
           <Typography
-            variant="h2"
+            variant="h3"
             sx={{
               display: 'flex',
-            //   flexDirection: { xs: 'column', md: 'row' },
               alignSelf: 'center',
               textAlign: 'center',
-            //   fontSize: 'clamp(3.5rem, 10vw, 4rem)',
             }}
           >
             IT Department&nbsp;
             <Typography
               component="span"
-              variant="h2"
+              variant="h3"
               sx={{
-                // fontSize: 'clamp(3rem, 10vw, 4rem)',
                 color: (theme) =>
                   theme.palette.mode === 'light' ? 'primary.main' : 'primary.main',
               }}
@@ -56,7 +50,7 @@ export default function Hero() {
             color="text.secondary"
             sx={{ alignSelf: 'center', width: { sm: '100%', md: '80%' } }}
           >
-            To build a culture of innovation and  research in students and make them capable to solve upcoming challenges of human life using computing.
+Enhance your organizational efficiency with our smart notice board application, designed to help you stay informed about all essential events and announcements.
           </Typography>
         </Stack>
       </Container>
