@@ -33,7 +33,7 @@ export default function Hero() {
               textAlign: 'center',
             }}
           >
-            IT Department&nbsp;
+            IT Evening&nbsp;
             <Typography
               component="span"
               variant="h3"
