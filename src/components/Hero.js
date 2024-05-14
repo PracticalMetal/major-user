@@ -26,17 +26,17 @@ export default function Hero() {
       >
         <Stack spacing={2} useFlexGap sx={{ width: { xs: '100%', sm: '70%' } }}>
           <Typography
-            variant="h3"
+            variant="h5"
             sx={{
               display: 'flex',
               alignSelf: 'center',
               textAlign: 'center',
             }}
           >
-            IT Evening&nbsp;
+            IT Department(Evening Shift)&nbsp;
             <Typography
               component="span"
-              variant="h3"
+              variant="h5"
               sx={{
                 color: (theme) =>
                   theme.palette.mode === 'light' ? 'primary.main' : 'primary.main',

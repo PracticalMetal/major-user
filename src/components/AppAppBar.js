@@ -90,7 +90,7 @@ function AppAppBar({ mode, toggleColorMode }) {
                 style={logoStyle}
                 alt="logo of sitemark"
               />
-              <Typography variant="h6" color="black" sx={{
+              <Typography variant="h5" color="black" sx={{
                 fontFamily: 'Arial, sans-serif', // Change font family here
                 fontWeight: 'bold', // Optionally adjust font weight
                 ml: 1, // Add some margin to separate logo and text
